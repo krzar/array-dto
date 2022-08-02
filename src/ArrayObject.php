@@ -10,7 +10,7 @@ use ReflectionUnionType;
 
 abstract class ArrayObject
 {
-    private const PROPERTIES_TO_IGNORE = ['arrayMap'];
+    private const PROPERTIES_TO_IGNORE = ['arrayMap', 'namesMap'];
 
     protected array $arrayMap = [];
     protected array $namesMap = [];
