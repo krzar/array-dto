@@ -1,0 +1,17 @@
+{
+    "name": "krzar/php-array-objects",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Krystian Zaręba"
+        }
+    ],
+    "require": {
+        "php": "8.0^"
+    },
+    "autoload": {
+        "psr-4": {
+            "Krzar\\PhpArrayObjects\\": "src/"
+        }
+    }
+}
