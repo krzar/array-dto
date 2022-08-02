@@ -38,16 +38,16 @@ class UserData extends ArrayObject {
 To create this object from array call:
 
 ```php
-    $data = [
-        'name' => 'Test',
-        'email' => 'test@test.com',
-        'age' => 99,
-        'money' => 1520.50,
-        'isActive' => true,
-        'roles' => ['ADMIN']
-    ];
+$data = [
+    'name' => 'Test',
+    'email' => 'test@test.com',
+    'age' => 99,
+    'money' => 1520.50,
+    'isActive' => true,
+    'roles' => ['ADMIN']
+];
 
-    UserData::create($data);
+UserData::create($data);
 ```
 
 If any parameter is not passed no value will be assigned, so a default value should be established for such cases.
@@ -75,21 +75,21 @@ class UserData extends ArrayObject {
 To create this object from array call:
 
 ```php
-    $data = [
-        'name' => 'Test',
-        'email' => 'test@test.com',
-        'age' => 99,
-        'money' => 1520.50,
-        'isActive' => true,
-        'roles' => ['ADMIN'],
-        'company' => [
-            'name' => 'Test Company',
-            'city' => 'Test',
-            'street' => 'Test Street 1'
-        ]   
-    ];
+$data = [
+    'name' => 'Test',
+    'email' => 'test@test.com',
+    'age' => 99,
+    'money' => 1520.50,
+    'isActive' => true,
+    'roles' => ['ADMIN'],
+    'company' => [
+        'name' => 'Test Company',
+        'city' => 'Test',
+        'street' => 'Test Street 1'
+    ]   
+];
 
-    UserData::create($data);
+UserData::create($data);
 ```
 
 ### Nested object multidimensional
@@ -107,7 +107,7 @@ class UserData extends ArrayObject {
     public CompanyData $company;
     public array $children;
     
-    protected array $arrayMap [
+    protected array $arrayMap = [
         'children' => UserData:class
     ];
 }
@@ -116,31 +116,31 @@ class UserData extends ArrayObject {
 To create this object from array call:
 
 ```php
-    $data = [
-        'name' => 'Test',
-        'email' => 'test@test.com',
-        'age' => 99,
-        'money' => 1520.50,
-        'isActive' => true,
-        'roles' => ['ADMIN'],
-        'company' => [
-            'name' => 'Test Company',
-            'city' => 'Test',
-            'street' => 'Test Street 1'
-        ],
-        'children' => [
-            [
-                'name' => 'Test 2',
-                'email' => 'test2@test.com',
-                'age' => 98,
-                'money' => 2400,
-                'isActive' => true,
-                'roles' => ['MODERATOR']
-            ]       
+$data = [
+    'name' => 'Test',
+    'email' => 'test@test.com',
+    'age' => 99,
+    'money' => 1520.50,
+    'isActive' => true,
+    'roles' => ['ADMIN'],
+    'company' => [
+        'name' => 'Test Company',
+        'city' => 'Test',
+        'street' => 'Test Street 1'
+    ],
+    'children' => [
+        [
+            'name' => 'Test 2',
+            'email' => 'test2@test.com',
+            'age' => 98,
+            'money' => 2400,
+            'isActive' => true,
+            'roles' => ['MODERATOR']
         ]       
-    ];
+    ]       
+];
 
-    UserData::create($data);
+UserData::create($data);
 ```
 
 ### Union types
@@ -157,3 +157,28 @@ public CompanyData|string $company;
 ```
 
 `CompanyData` will be created if a `company` index in array is array type.
+
+### Names mapping
+
+You can map names of parameters using `$namesMap` array.
+
+```php
+class UserData extends ArrayObject {
+    public string $name;
+    public string $email;
+    public int $age;
+    public float $money;
+    public bool $isActive = false;
+    public array $roles = [];
+    public CompanyData $company;
+    public array $children;
+    
+    protected array $arrayMap = [
+        'children' => UserData:class
+    ];
+    
+    protected array $namesMap = [
+        'is_active' => 'isActive'
+    ]
+}
+```
