@@ -13,6 +13,7 @@ abstract class ArrayObject
     private const PROPERTIES_TO_IGNORE = ['arrayMap'];
 
     protected array $arrayMap = [];
+    protected array $namesMap = [];
 
     private array $data;
 
@@ -56,16 +57,27 @@ abstract class ArrayObject
     private function assignBuildIn(string $name)
     {
         if ($className = $this->getArrayMapClass($name)) {
-            $this->{$name} = Generator::generateMultiple($className, $this->data[$name]);
+            $this->{$this->getCorrectPropertyName($name)} = Generator::generateMultiple(
+                $className,
+                $this->data[$name]
+            );
         } else {
-            $this->{$name} = $this->data[$name];
+            $this->{$this->getCorrectPropertyName($name)} = $this->data[$name];
         }
     }
 
     private function assignCustom(string $name, ReflectionNamedType $type)
     {
         $className = $type->getName();
-        $this->{$name} = Generator::generate($className, $this->data[$name]);
+        $this->{$this->getCorrectPropertyName($name)} = Generator::generate(
+            $className,
+            $this->data[$name]
+        );
+    }
+
+    private function getCorrectPropertyName(string $name): string
+    {
+        return $this->namesMap[$name] ?? $name;
     }
 
     private function isPropertyToAssign(string $name): bool
