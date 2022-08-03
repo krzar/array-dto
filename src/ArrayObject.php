@@ -22,14 +22,14 @@ abstract class ArrayObject
         $this->data = $data;
     }
 
-    public static function create(array $data)
+    public static function create(array $data): static
     {
         $class = get_called_class();
 
         return (new $class($data))->generate();
     }
 
-    public function generate(): self
+    public function generate(): static
     {
         $reflectionClass = new ReflectionClass($this);
         $properties = $reflectionClass->getProperties();
@@ -57,32 +57,36 @@ abstract class ArrayObject
     private function assignBuildIn(string $name)
     {
         if ($className = $this->getArrayMapClass($name)) {
-            $this->{$this->getCorrectPropertyName($name)} = Generator::generateMultiple(
-                $className,
-                $this->data[$name]
-            );
+            $this->{$name} = Generator::generateMultiple($className, $this->getValueByName($name));
         } else {
-            $this->{$this->getCorrectPropertyName($name)} = $this->data[$name];
+            $this->{$name} = $this->getValueByName($name);
         }
     }
 
     private function assignCustom(string $name, ReflectionNamedType $type)
     {
         $className = $type->getName();
-        $this->{$this->getCorrectPropertyName($name)} = Generator::generate(
-            $className,
-            $this->data[$name]
-        );
-    }
-
-    private function getCorrectPropertyName(string $name): string
-    {
-        return $this->namesMap[$name] ?? $name;
+        $this->{$name} = Generator::generate($className, $this->getValueByName($name));
     }
 
     private function isPropertyToAssign(string $name): bool
     {
-        return !in_array($name, self::PROPERTIES_TO_IGNORE) && isset($this->data[$name]);
+        return !in_array($name, self::PROPERTIES_TO_IGNORE) && $this->isDataSet($name);
+    }
+
+    private function isDataSet(string $name): bool
+    {
+        return isset($this->data[$this->getCorrectItemName($name)]);
+    }
+
+    private function getValueByName(string $name): mixed
+    {
+        return $this->data[$this->getCorrectItemName($name)];
+    }
+
+    private function getCorrectItemName(string $name): string
+    {
+        return $this->namesMap[$name] ?? $name;
     }
 
     private function getArrayMapClass(string $name): ?string
@@ -98,7 +102,7 @@ abstract class ArrayObject
             $type = $property->getType();
 
             if ($type instanceof ReflectionUnionType) {
-                return $this->getCurrentTypeFromUnion($type, $this->data[$name]);
+                return $this->getCurrentTypeFromUnion($type, $this->getValueByName($name));
             }
 
             return $type;
