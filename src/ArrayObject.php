@@ -43,6 +43,11 @@ abstract class ArrayObject
         return $this;
     }
 
+    protected function typesMap(): array
+    {
+        return [];
+    }
+
     private function assignProperty(ReflectionProperty $property)
     {
         $name = $property->getName();
@@ -138,9 +143,11 @@ abstract class ArrayObject
         return null;
     }
 
-    private function typeToMap(string $name): Closure|string|null
+    #[Pure] private function typeToMap(string $name): Closure|string|null
     {
-        return $this->typesMap[$name] ?? null;
+        $typesMap = array_merge($this->typesMap, $this->typesMap());
+
+        return $typesMap[$name] ?? null;
     }
 
     private function fixValueByType(string $name, mixed $value)
