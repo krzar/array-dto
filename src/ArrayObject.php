@@ -2,6 +2,7 @@
 
 namespace KrZar\PhpArrayObjects;
 
+use Closure;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionNamedType;
@@ -14,6 +15,7 @@ abstract class ArrayObject
 
     protected array $arrayMap = [];
     protected array $namesMap = [];
+    protected array $typesMap = [];
 
     private array $data;
 
@@ -59,7 +61,10 @@ abstract class ArrayObject
         if ($className = $this->getArrayMapClass($name)) {
             $this->{$name} = Generator::generateMultiple($className, $this->getValueByName($name));
         } else {
-            $this->{$name} = $this->getValueByName($name);
+            $value = $this->getValueByName($name);
+            $value = $this->fixValueByType($name, $value);
+
+            $this->{$name} = $value;
         }
     }
 
@@ -131,5 +136,25 @@ abstract class ArrayObject
         }
 
         return null;
+    }
+
+    private function typeToMap(string $name): Closure|string|null
+    {
+        return $this->typesMap[$name] ?? null;
+    }
+
+    private function fixValueByType(string $name, mixed $value)
+    {
+        $type = $this->typeToMap($name);
+
+        if ($type) {
+            if ($type instanceof Closure) {
+                $type($value, $name);
+            } else {
+                settype($value, $type);
+            }
+        }
+
+        return $value;
     }
 }
