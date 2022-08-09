@@ -160,7 +160,7 @@ public CompanyData|string $company;
 
 ### Names mapping
 
-You can map names of parameters using `$namesMap` array.
+You can map names of parameters using `$namesMap` array:
 
 ```php
 class UserData extends ArrayObject {
@@ -182,3 +182,46 @@ class UserData extends ArrayObject {
     ]
 }
 ```
+
+### Types mapping
+
+You can map types of parameters using `$typesMap` array:
+
+```php
+class UserData extends ArrayObject {
+    public string $name;
+    public string $email;
+    public int $age;
+    public float $money;
+    public bool $isActive = false;
+    public array $roles = [];
+    public CompanyData $company;
+    public array $children;
+    
+    protected array $arrayMap = [
+        'children' => UserData:class
+    ];
+    
+    protected array $namesMap = [
+        'is_active' => 'isActive'
+    ]
+    
+    protected array $typesMap = [
+        'age' => 'int'
+    ]
+}
+```
+
+For example age for user in api is a string, but we want to map this to int.
+
+You can also use `typesMap` method, this allows you tu use Closure.
+
+```php
+    protected function typesMap(): array {
+        return [
+            'age' => fn(string $value, array $data) => (int) $value
+        ]
+    }
+```
+
+First argument of closure is a value of property, second is full data array.

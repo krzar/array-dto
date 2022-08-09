@@ -156,7 +156,7 @@ abstract class ArrayObject
 
         if ($type) {
             if ($type instanceof Closure) {
-                $value = $type($value, $name);
+                $value = $type($value, $this->data);
             } else {
                 settype($value, $type);
             }
