@@ -53,10 +53,10 @@ abstract class ArrayObject
         $name = $property->getName();
 
         if ($type = $this->getCorrectType($property)) {
-            if ($type->isBuiltin()) {
-                $this->assignBuildIn($name);
-            } else {
+            if ($this->isArrayObject($type)) {
                 $this->assignCustom($name, $type);
+            } else {
+                $this->assignBuildIn($name);
             }
         }
     }
@@ -64,13 +64,13 @@ abstract class ArrayObject
     private function assignBuildIn(string $name)
     {
         if ($className = $this->getArrayMapClass($name)) {
-            $this->{$name} = Generator::generateMultiple($className, $this->getValueByName($name));
+            $value = Generator::generateMultiple($className, $this->getValueByName($name));
         } else {
             $value = $this->getValueByName($name);
-            $value = $this->fixValueByType($name, $value);
-
-            $this->{$name} = $value;
         }
+
+        $value = $this->fixValueByType($name, $value);
+        $this->{$name} = $value;
     }
 
     private function assignCustom(string $name, ReflectionNamedType $type)
@@ -163,5 +163,16 @@ abstract class ArrayObject
         }
 
         return $value;
+    }
+
+    private function isArrayObject(ReflectionNamedType $type): bool
+    {
+        $className = $type->getName();
+
+        if (class_exists($className)) {
+            return new $className() instanceof ArrayObject;
+        }
+
+        return false;
     }
 }
