@@ -156,7 +156,7 @@ abstract class ArrayObject
 
         if ($type) {
             if ($type instanceof Closure) {
-                $type($value, $name);
+                $value = $type($value, $name);
             } else {
                 settype($value, $type);
             }
@@ -170,7 +170,7 @@ abstract class ArrayObject
         $className = $type->getName();
 
         if (class_exists($className)) {
-            return new $className() instanceof ArrayObject;
+            return new $className([]) instanceof ArrayObject;
         }
 
         return false;
