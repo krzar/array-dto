@@ -10,12 +10,21 @@ This can be useful for integrations with some APIs, for example.
 
 ## Supports
 
-- PHP 8+
+| Package Version | PHP Version | Supported           |
+|-----------------|-------------|---------------------|
+| 2.x             | 8.1         | :white_check_mark:  |
+| 1.x             | 8.0         | :white_check_mark:  |
 
 ## Installation
 
 ```bash
 composer require krzar/php-array-objects
+```
+
+### For PHP 8.0
+
+```bash
+composer require krzar/php-array-objects:^1.2
 ```
 
 ## Usage
