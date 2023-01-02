@@ -4,7 +4,7 @@ namespace KrZar\PhpArrayObjects;
 
 class Generator
 {
-    public static function generate(string|ArrayObject $class, array $data)
+    public static function generate(string|ArrayObject $class, array $data): ArrayObject
     {
         return $class::create($data);
     }

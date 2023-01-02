@@ -48,7 +48,7 @@ abstract class ArrayObject
         return [];
     }
 
-    private function assignProperty(ReflectionProperty $property)
+    private function assignProperty(ReflectionProperty $property): void
     {
         $name = $property->getName();
 
@@ -61,7 +61,7 @@ abstract class ArrayObject
         }
     }
 
-    private function assignBuildIn(string $name)
+    private function assignBuildIn(string $name): void
     {
         if ($className = $this->getArrayMapClass($name)) {
             $value = Generator::generateMultiple($className, $this->getValueByName($name));
@@ -73,7 +73,7 @@ abstract class ArrayObject
         $this->{$name} = $value;
     }
 
-    private function assignCustom(string $name, ReflectionNamedType $type)
+    private function assignCustom(string $name, ReflectionNamedType $type): void
     {
         $className = $type->getName();
         $value = $this->getValueByName($name);
