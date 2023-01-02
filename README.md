@@ -187,7 +187,7 @@ class UserData extends ArrayObject {
     ];
     
     protected array $namesMap = [
-        'is_active' => 'isActive'
+        'isActive' => 'is_active'
     ]
 }
 ```
@@ -212,7 +212,7 @@ class UserData extends ArrayObject {
     ];
     
     protected array $namesMap = [
-        'is_active' => 'isActive'
+        'isActive' => 'is_active'
     ]
     
     protected array $typesMap = [
