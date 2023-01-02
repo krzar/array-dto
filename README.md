@@ -10,10 +10,10 @@ This can be useful for integrations with some APIs, for example.
 
 ## Supports
 
-| Package Version | PHP Version | Supported           |
-|-----------------|-------------|---------------------|
-| 2.x             | 8.1         | :white_check_mark:  |
-| 1.x             | 8.0         | :white_check_mark:  |
+| Package Version | PHP Version    | Supported          |
+|-----------------|----------------|--------------------|
+| 2.x             | 8.1 &#124; 8.2 | :white_check_mark: |
+| 1.x             | 8.0            | :x:                |
 
 ## Installation
 
