@@ -181,7 +181,7 @@ abstract class ArrayObject
         $className = $type->getName();
 
         if (class_exists($className) && !enum_exists($className)) {
-            return new $className([]) instanceof ArrayObject;
+            return is_subclass_of($className, ArrayObject::class);
         }
 
         return false;
