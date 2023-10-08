@@ -17,11 +17,11 @@ abstract class ArrayObject
     protected array $namesMap = [];
     protected array $typesMap = [];
 
-    private array $data;
+    private array $_raw;
 
-    public function __construct(array $data)
+    public function __construct(array $_raw)
     {
-        $this->data = $data;
+        $this->_raw = $_raw;
     }
 
     public static function create(array $data): static
@@ -41,6 +41,11 @@ abstract class ArrayObject
         }
 
         return $this;
+    }
+
+    public function getRaw(): array
+    {
+        return $this->_raw;
     }
 
     protected function typesMap(): array
@@ -92,12 +97,12 @@ abstract class ArrayObject
 
     private function isDataSet(string $name): bool
     {
-        return isset($this->data[$this->getCorrectItemName($name)]);
+        return isset($this->_raw[$this->getCorrectItemName($name)]);
     }
 
     private function getValueByName(string $name): mixed
     {
-        return $this->data[$this->getCorrectItemName($name)];
+        return $this->_raw[$this->getCorrectItemName($name)];
     }
 
     private function getCorrectItemName(string $name): string
@@ -162,7 +167,7 @@ abstract class ArrayObject
 
         if ($type) {
             if ($type instanceof Closure) {
-                $value = $type($value, $this->data);
+                $value = $type($value, $this->_raw);
             } else {
                 settype($value, $type);
             }
