@@ -1,24 +1,24 @@
 <?php
 
-namespace KrZar\tests;
+namespace KrZar\ArrayDto\tests;
 
-use KrZar\PhpArrayObjects\Generator;
-use KrZar\PhpArrayObjects\Mocks\ArrayObjectMock;
+use KrZar\ArrayDto\Generator;
+use KrZar\ArrayDto\Mocks\ArrayDtoMock;
 use PHPUnit\Framework\TestCase;
 
 class GeneratorTest extends TestCase
 {
     public function testSingle()
     {
-        $object = Generator::generate(ArrayObjectMock::class, ['stringField' => 'generated']);
-        $this->assertInstanceOf(ArrayObjectMock::class, $object);
+        $object = Generator::generate(ArrayDtoMock::class, ['stringField' => 'generated']);
+        $this->assertInstanceOf(ArrayDtoMock::class, $object);
         $this->assertEquals('generated', $object->stringField);
     }
 
     public function testMultiple()
     {
         $objects = Generator::generateMultiple(
-            ArrayObjectMock::class,
+            ArrayDtoMock::class,
             [
                 ['stringField' => 'first'],
                 ['stringField' => 'second']

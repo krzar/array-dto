@@ -1,26 +1,26 @@
 {
-    "name": "krzar/php-array-objects",
+    "name": "krzar/array-dto",
     "license": "MIT",
-    "version": "v2.2.1",
+    "version": "v1.0.0",
     "authors": [
         {
             "name": "Krystian Zaręba"
         }
     ],
     "scripts": {
-        "phpunit": "php ./vendor/bin/phpunit"
+        "test": "php ./vendor/bin/phpunit"
     },
     "require": {
         "php": "^8.1"
     },
     "autoload": {
         "psr-4": {
-            "KrZar\\PhpArrayObjects\\": "src/"
+            "KrZar\\ArrayDto\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "KrZar\\PhpArrayObjects\\Mocks\\": "mocks/"
+            "KrZar\\ArrayDto\\Mocks\\": "mocks/"
         }
     },
     "require-dev": {

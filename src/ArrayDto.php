@@ -1,21 +1,27 @@
 <?php
 
-namespace KrZar\PhpArrayObjects;
+namespace KrZar\ArrayDto;
 
-use Closure;
-use JetBrains\PhpStorm\Pure;
+use KrZar\ArrayDto\Casts\ClosureCast;
+use KrZar\ArrayDto\Casts\MultidimensionalCast;
+use KrZar\ArrayDto\Casts\NameCast;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionUnionType;
 
-abstract class ArrayObject
+abstract class ArrayDto
 {
-    private const PROPERTIES_TO_IGNORE = ['arrayMap', 'namesMap'];
+    private const PROPERTIES_TO_IGNORE = ['castedNames', 'multidimensionalCast', 'closureCast'];
 
-    protected array $arrayMap = [];
-    protected array $namesMap = [];
-    protected array $typesMap = [];
+    /** @var string[] */
+    private array $castedNames = [];
+
+    /** @var MultidimensionalCast[] */
+    private array $multidimensionalCast = [];
+
+    /** @var ClosureCast[] */
+    private array $closureCast = [];
 
     private array $_raw;
 
@@ -26,13 +32,13 @@ abstract class ArrayObject
 
     public static function create(array $data): static
     {
-        $class = get_called_class();
-
-        return (new $class($data))->generate();
+        return (new static($data))->generate();
     }
 
     public function generate(): static
     {
+        $this->prepareCasts();
+
         $reflectionClass = new ReflectionClass($this);
         $properties = $reflectionClass->getProperties();
 
@@ -48,7 +54,7 @@ abstract class ArrayObject
         return $this->_raw;
     }
 
-    protected function typesMap(): array
+    protected function casts(): array
     {
         return [];
     }
@@ -58,24 +64,25 @@ abstract class ArrayObject
         $name = $property->getName();
 
         if ($type = $this->getCorrectType($property)) {
-            if ($this->isArrayObject($type)) {
+            if ($this->isArrayDto($type)) {
                 $this->assignCustom($name, $type);
             } else {
-                $this->assignBuildIn($name);
+                $this->assignBuildIn($name, $type);
             }
         }
     }
 
-    private function assignBuildIn(string $name): void
+    private function assignBuildIn(string $name, ReflectionNamedType $type): void
     {
-        if ($className = $this->getArrayMapClass($name)) {
+        if ($className = $this->getArrayDtoClass($name)) {
             $value = Generator::generateMultiple($className, $this->getValueByName($name));
         } else {
             $value = $this->getValueByName($name);
         }
 
-        $value = $this->fixValueByType($name, $value);
-        $this->{$name} = $value;
+        settype($value, $type->getName());
+
+        $this->{$name} = $this->applyClosureCast($name, $value);
     }
 
     private function assignCustom(string $name, ReflectionNamedType $type): void
@@ -83,7 +90,7 @@ abstract class ArrayObject
         $className = $type->getName();
         $value = $this->getValueByName($name);
 
-        if ($value instanceof ArrayObject) {
+        if ($value instanceof ArrayDto) {
             $this->{$name} = $value;
         } else {
             $this->{$name} = Generator::generate($className, $value);
@@ -92,7 +99,11 @@ abstract class ArrayObject
 
     private function isPropertyToAssign(string $name): bool
     {
-        return !in_array($name, self::PROPERTIES_TO_IGNORE) && $this->isDataSet($name);
+        if (in_array($name, self::PROPERTIES_TO_IGNORE)) {
+            return false;
+        }
+
+        return $this->isDataSet($name) || isset($this->closureCast[$name]);
     }
 
     private function isDataSet(string $name): bool
@@ -102,17 +113,21 @@ abstract class ArrayObject
 
     private function getValueByName(string $name): mixed
     {
-        return $this->_raw[$this->getCorrectItemName($name)];
+        return $this->_raw[$this->getCorrectItemName($name)] ?? null;
     }
 
     private function getCorrectItemName(string $name): string
     {
-        return $this->namesMap[$name] ?? $name;
+        return $this->castedNames[$name] ?? $name;
     }
 
-    private function getArrayMapClass(string $name): ?string
+    private function getArrayDtoClass(string $name): ?string
     {
-        return $this->arrayMap[$name] ?? null;
+        if (isset($this->multidimensionalCast[$name])) {
+            return $this->multidimensionalCast[$name]->className;
+        }
+
+        return null;
     }
 
     private function getCorrectType(ReflectionProperty $property): ?ReflectionNamedType
@@ -132,7 +147,7 @@ abstract class ArrayObject
         return null;
     }
 
-    #[Pure] private function getCurrentTypeFromUnion(
+    private function getCurrentTypeFromUnion(
         ReflectionUnionType $unionType,
         mixed               $dataItem
     ): ?ReflectionNamedType
@@ -154,36 +169,36 @@ abstract class ArrayObject
         return null;
     }
 
-    #[Pure] private function typeToMap(string $name): Closure|string|null
-    {
-        $typesMap = array_merge($this->typesMap, $this->typesMap());
-
-        return $typesMap[$name] ?? null;
-    }
-
-    private function fixValueByType(string $name, mixed $value)
-    {
-        $type = $this->typeToMap($name);
-
-        if ($type) {
-            if ($type instanceof Closure) {
-                $value = $type($value, $this->_raw);
-            } else {
-                settype($value, $type);
-            }
-        }
-
-        return $value;
-    }
-
-    private function isArrayObject(ReflectionNamedType $type): bool
+    private function isArrayDto(ReflectionNamedType $type): bool
     {
         $className = $type->getName();
 
         if (class_exists($className) && !enum_exists($className)) {
-            return is_subclass_of($className, ArrayObject::class);
+            return is_subclass_of($className, ArrayDto::class);
         }
 
         return false;
+    }
+
+    private function prepareCasts(): void
+    {
+        foreach ($this->casts() as $key => $cast) {
+            match (get_class($cast)) {
+                NameCast::class => $this->castedNames[$cast->name] = $key,
+                MultidimensionalCast::class => $this->multidimensionalCast[$key] = $cast,
+                ClosureCast::class => $this->closureCast[$key] = $cast,
+            };
+        }
+    }
+
+    private function applyClosureCast(string $name, mixed $value): mixed
+    {
+        if (isset($this->closureCast[$name])) {
+            $closure = $this->closureCast[$name]->closure;
+
+            return $closure($value, $this->_raw);
+        }
+
+        return $value;
     }
 }

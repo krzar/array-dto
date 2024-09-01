@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace KrZar\tests;
+namespace KrZar\ArrayDto\tests;
 
-use KrZar\PhpArrayObjects\ArrayObject;
-use KrZar\PhpArrayObjects\Mocks\ArrayObjectMock;
-use KrZar\PhpArrayObjects\Mocks\NestedArrayObjectMock;
+use KrZar\ArrayDto\ArrayDto;
+use KrZar\ArrayDto\Mocks\ArrayDtoMock;
+use KrZar\ArrayDto\Mocks\NestedArrayDtoMock;
 use PHPUnit\Framework\TestCase;
 
-class ArrayObjectTest extends TestCase
+class ArrayDtoTest extends TestCase
 {
-    private ArrayObject $testedClass;
+    private ArrayDto $testedClass;
 
     public function setUp(): void
     {
@@ -39,7 +39,7 @@ class ArrayObjectTest extends TestCase
         $data['unionTypeFieldObject'] = $data;
 
 
-        $this->testedClass = ArrayObjectMock::create($data);
+        $this->testedClass = ArrayDtoMock::create($data);
     }
 
     public function testBaseTypes()
@@ -47,13 +47,14 @@ class ArrayObjectTest extends TestCase
         $this->assertEquals('test', $this->testedClass->stringField);
         $this->assertEquals(10, $this->testedClass->intField);
         $this->assertEquals(10.55, $this->testedClass->floatField);
-        $this->assertEquals(false, $this->testedClass->boolField);
+        $this->assertFalse($this->testedClass->boolField);
         $this->assertEquals(['one' => 'oneValue'], $this->testedClass->arrayField);
+        $this->assertEquals(15, $this->testedClass->customField);
     }
 
     public function testNested()
     {
-        $this->assertInstanceOf(ArrayObjectMock::class, $this->testedClass->objectField);
+        $this->assertInstanceOf(ArrayDtoMock::class, $this->testedClass->objectField);
         $this->assertEquals('test', $this->testedClass->objectField->stringField);
         $this->assertEquals(null, $this->testedClass->objectField->objectField);
     }
@@ -61,15 +62,15 @@ class ArrayObjectTest extends TestCase
     public function testNestedMultidimensional()
     {
         $this->assertIsArray($this->testedClass->multidimensionalField);
-        $this->assertInstanceOf(NestedArrayObjectMock::class, $this->testedClass->multidimensionalField[0]);
+        $this->assertInstanceOf(NestedArrayDtoMock::class, $this->testedClass->multidimensionalField[0]);
         $this->assertEquals('one', $this->testedClass->multidimensionalField[0]->field);
-        $this->assertInstanceOf(NestedArrayObjectMock::class, $this->testedClass->multidimensionalField[1]);
+        $this->assertInstanceOf(NestedArrayDtoMock::class, $this->testedClass->multidimensionalField[1]);
         $this->assertEquals('two', $this->testedClass->multidimensionalField[1]->field);
     }
 
     public function testUnionTypes()
     {
-        $this->assertInstanceOf(ArrayObjectMock::class, $this->testedClass->unionTypeFieldObject);
+        $this->assertInstanceOf(ArrayDtoMock::class, $this->testedClass->unionTypeFieldObject);
         $this->assertEquals('unionField', $this->testedClass->unionTypeFieldString);
     }
 

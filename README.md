@@ -1,8 +1,8 @@
-# PHP Array Objects
+# PHP Array DTO
 
-![license mit](https://badgen.net/github/license/krzar/php-array-objects)
-![release](https://badgen.net/github/release/krzar/php-array-objects)
-![last commit](https://badgen.net/github/last-commit/krzar/php-array-objects)
+![license mit](https://badgen.net/github/license/krzar/array-dto)
+![release](https://badgen.net/github/release/krzar/array-dto)
+![last commit](https://badgen.net/github/last-commit/krzar/array-dto)
 
 This package allows you to generate object based on array data.
 
@@ -12,19 +12,12 @@ This can be useful for integrations with some APIs, for example.
 
 | Package Version | PHP Version    | Supported          |
 |-----------------|----------------|--------------------|
-| 2.x             | 8.1 &#124; 8.2 | :white_check_mark: |
-| 1.x             | 8.0            | :x:                |
+| 1.x             | 8.1+           | :white_check_mark: |
 
 ## Installation
 
 ```bash
-composer require krzar/php-array-objects
-```
-
-### For PHP 8.0
-
-```bash
-composer require krzar/php-array-objects:^1.2
+composer require krzar/array-dto
 ```
 
 ## Usage
@@ -32,9 +25,9 @@ composer require krzar/php-array-objects:^1.2
 ### Simple object
 
 ```php
-use KrZar\PhpArrayObjects\ArrayObject;
+use KrZar\ArrayDto\ArrayDto;
 
-class UserData extends ArrayObject {
+class UserData extends ArrayDto {
     public string $name;
     public string $email;
     public int $age;
@@ -59,7 +52,7 @@ $data = [
 UserData::create($data);
 ```
 
-If any parameter is not passed no value will be assigned, so a default value should be established for such cases.
+If any parameter is not passed any value will be assigned, so a default value should be established for such cases.
 
 ### Nested object
 
@@ -116,9 +109,11 @@ class UserData extends ArrayObject {
     public CompanyData $company;
     public array $children;
     
-    protected array $arrayMap = [
-        'children' => UserData:class
-    ];
+     protected function casts(): array {
+        return [
+            'children' => new \KrZar\ArrayDto\Casts\MultidimensionalCast(UserData::class),
+        ];
+     }
 }
 ```
 
@@ -181,20 +176,23 @@ class UserData extends ArrayObject {
     public array $roles = [];
     public CompanyData $company;
     public array $children;
-    
-    protected array $arrayMap = [
-        'children' => UserData:class
-    ];
-    
-    protected array $namesMap = [
-        'isActive' => 'is_active'
-    ]
-}
+
+    protected function casts(): array {
+            return [
+                'children' => new \KrZar\ArrayDto\Casts\MultidimensionalCast(UserData::class),
+                'is_active' => new \KrZar\ArrayDto\Casts\NameCast('isActive')
+            ];
+         }
+    }
 ```
 
 ### Types mapping
 
-You can map types of parameters using `$typesMap` array:
+Types are mapped automatically.
+
+### Custom casts
+
+You can make any custom cast and mapping to parameter.
 
 ```php
 class UserData extends ArrayObject {
@@ -206,31 +204,16 @@ class UserData extends ArrayObject {
     public array $roles = [];
     public CompanyData $company;
     public array $children;
-    
-    protected array $arrayMap = [
-        'children' => UserData:class
-    ];
-    
-    protected array $namesMap = [
-        'isActive' => 'is_active'
-    ]
-    
-    protected array $typesMap = [
-        'age' => 'int'
-    ]
-}
-```
+    public int $agePlusTen;
 
-For example age for user in api is a string, but we want to map this to int.
-
-You can also use `typesMap` method, this allows you tu use Closure.
-
-```php
-    protected function typesMap(): array {
-        return [
-            'age' => fn(string $value, array $data) => (int) $value
-        ]
+    protected function casts(): array {
+            return [
+                'children' => new \KrZar\ArrayDto\Casts\MultidimensionalCast(UserData::class),
+                'is_active' => new \KrZar\ArrayDto\Casts\NameCast('isActive'),
+                'agePlusTen' => new \KrZar\ArrayDto\Casts\CustomCast(
+                    fn(mixed $value, array $raw) => $raw['age'] + 10
+                ),
+            ];
+         }
     }
 ```
-
-First argument of closure is a value of property, second is full data array.
