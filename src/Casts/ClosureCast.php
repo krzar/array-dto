@@ -4,7 +4,7 @@ namespace KrZar\ArrayDto\Casts;
 
 use Closure;
 
-class ClosureCast
+class ClosureCast implements Cast
 {
     public function __construct(public readonly Closure $closure)
     {

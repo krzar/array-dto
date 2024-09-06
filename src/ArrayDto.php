@@ -2,6 +2,7 @@
 
 namespace KrZar\ArrayDto;
 
+use KrZar\ArrayDto\Casts\Cast;
 use KrZar\ArrayDto\Casts\ClosureCast;
 use KrZar\ArrayDto\Casts\MultidimensionalCast;
 use KrZar\ArrayDto\Casts\NameCast;
@@ -182,12 +183,16 @@ abstract class ArrayDto
 
     private function prepareCasts(): void
     {
-        foreach ($this->casts() as $key => $cast) {
-            match (get_class($cast)) {
-                NameCast::class => $this->castedNames[$cast->name] = $key,
-                MultidimensionalCast::class => $this->multidimensionalCast[$key] = $cast,
-                ClosureCast::class => $this->closureCast[$key] = $cast,
-            };
+        foreach ($this->casts() as $field => $value) {
+            if (is_array($value)) {
+                foreach ($value as $cast) {
+                    $this->assignCast($field, $cast);
+                }
+
+                continue;
+            }
+
+            $this->assignCast($field, $value);
         }
     }
 
@@ -200,5 +205,14 @@ abstract class ArrayDto
         }
 
         return $value;
+    }
+
+    private function assignCast(string $field, Cast $cast): void
+    {
+        match (get_class($cast)) {
+            NameCast::class => $this->castedNames[$cast->name] = $field,
+            MultidimensionalCast::class => $this->multidimensionalCast[$field] = $cast,
+            ClosureCast::class => $this->closureCast[$field] = $cast,
+        };
     }
 }

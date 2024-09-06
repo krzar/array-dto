@@ -192,7 +192,7 @@ Types are mapped automatically.
 
 ### Custom casts
 
-You can make any custom cast and mapping to parameter.
+You can make any custom cast and mapping to parameter. You can also provide array of casts.
 
 ```php
 class UserData extends ArrayObject {
