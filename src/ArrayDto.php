@@ -66,14 +66,14 @@ abstract class ArrayDto
 
         if ($type = $this->getCorrectType($property)) {
             if ($this->isArrayDto($type)) {
-                $this->assignCustom($name, $type);
+                $this->assignArrayDto($name, $type);
             } else {
-                $this->assignBuildIn($name, $type);
+                $this->assignOther($name, $type);
             }
         }
     }
 
-    private function assignBuildIn(string $name, ReflectionNamedType $type): void
+    private function assignOther(string $name, ReflectionNamedType $type): void
     {
         if ($className = $this->getArrayDtoClass($name)) {
             $value = Generator::generateMultiple($className, $this->getValueByName($name));
@@ -81,12 +81,14 @@ abstract class ArrayDto
             $value = $this->getValueByName($name);
         }
 
-        settype($value, $type->getName());
+        if ($type->isBuiltin()) {
+            settype($value, $type->getName());
+        }
 
         $this->{$name} = $this->applyClosureCast($name, $value);
     }
 
-    private function assignCustom(string $name, ReflectionNamedType $type): void
+    private function assignArrayDto(string $name, ReflectionNamedType $type): void
     {
         $className = $type->getName();
         $value = $this->getValueByName($name);
