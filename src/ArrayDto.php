@@ -15,7 +15,7 @@ abstract class ArrayDto
 {
     private const PROPERTIES_TO_IGNORE = ['castedNames', 'multidimensionalCast', 'closureCast'];
 
-    /** @var string[] */
+    /** @var NameCast[] */
     private array $castedNames = [];
 
     /** @var MultidimensionalCast[] */
@@ -119,7 +119,11 @@ abstract class ArrayDto
 
     private function getCorrectItemName(string $name): string
     {
-        return $this->castedNames[$name] ?? $name;
+        if (isset($this->castedNames[$name])) {
+            return $this->castedNames[$name]->name;
+        }
+
+        return $name;
     }
 
     private function getArrayDtoClass(string $name): ?string
@@ -210,7 +214,7 @@ abstract class ArrayDto
     private function assignCast(string $field, Cast $cast): void
     {
         match (get_class($cast)) {
-            NameCast::class => $this->castedNames[$cast->name] = $field,
+            NameCast::class => $this->castedNames[$field] = $cast,
             MultidimensionalCast::class => $this->multidimensionalCast[$field] = $cast,
             ClosureCast::class => $this->closureCast[$field] = $cast,
         };
