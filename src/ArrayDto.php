@@ -2,6 +2,7 @@
 
 namespace KrZar\ArrayDto;
 
+use BackedEnum;
 use KrZar\ArrayDto\Casts\Cast;
 use KrZar\ArrayDto\Casts\ClosureCast;
 use KrZar\ArrayDto\Casts\MultidimensionalCast;
@@ -83,6 +84,12 @@ abstract class ArrayDto
 
         if ($type->isBuiltin()) {
             settype($value, $type->getName());
+        }
+
+        if (enum_exists($type->getName())) {
+            /** @var BackedEnum $enum */
+            $enum = $type->getName();
+            $value = $enum::from($value);
         }
 
         $this->{$name} = $this->applyClosureCast($name, $value);
